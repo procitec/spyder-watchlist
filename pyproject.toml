@@ -1,0 +1,42 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "spyder-watchlist"
+description = "Watchlist plugin for the debugger in the Spyder IDE"
+maintainers = [{name = "A. Reit", email = "a.reit@procitec.de"}]
+license = {file = "LICENSE"}
+dynamic = ["version"]
+requires-python = ">=3.7"  # required by Spyder
+dependencies = [
+    "spyder>=5.3,<6",
+    "spyder-kernels>=2.3,<3",
+]
+keywords = [
+    "Spyder",
+    "watchlist",
+    "debugger",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Topic :: Text Editors :: Integrated Development Environments (IDE)",
+    "Topic :: Software Development :: Debuggers",
+]
+readme = "README.md"
+
+[project.urls]
+Source = "https://github.com/procitec/spyder-watchlist"
+Changelog = "https://github.com/procitec/spyder-watchlist/blob/testing/CHANGELOG.md"
+
+[project.entry-points."spyder.plugins"]
+watchlist = "spyder_watchlist.plugin:Watchlist"
+
+[tool.flit.module]
+name = "spyder_watchlist"
+
+[tool.flit.sdist]
+exclude = [".gitignore"]
