@@ -109,4 +109,4 @@ class WatchlistMainWidget(ShellConnectMainWidget):
     def remove_all_expressions(self):
         widget = self.current_widget()
         if widget:
-            widget.onRemoveAllAction()
+            widget.onRemoveAllAction(refresh=True)

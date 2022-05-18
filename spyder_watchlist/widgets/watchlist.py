@@ -273,7 +273,8 @@ class WatchlistTableWidget(QTableWidget):
 
         self.setCurrentItem(exprItem)
         self.editItem(exprItem)
-        # calling _refresh() is handled by onExpressionChanged()
+        # calling _refresh() is handled by onExpressionChanged() when editing is
+        # finised
 
     def onRemoveAction(self):
         assert self.currentRow() != -1
@@ -281,13 +282,13 @@ class WatchlistTableWidget(QTableWidget):
         self._updateRemoveAction()
         self._refresh()
 
-    def onRemoveAllAction(self):
+    def onRemoveAllAction(self, *, refresh):
         self.clearContents()
         self.setRowCount(0)
         # disable remove action as table is empty now
         self.removeAction.setEnabled(False)
-
-        self._refresh()
+        if refresh:
+            self._refresh()
 
     # --- public API ---
     def setTableFont(self, font: QFont) -> None:
@@ -313,10 +314,7 @@ class WatchlistTableWidget(QTableWidget):
         return expressions
 
     def setExpressions(self, expressions: Collection[str]) -> None:
-        # Clear existing entries without emitting changed() signal. The signal
-        # is emitted after the new list is set.
-        with block_signals(self):
-            self.onRemoveAllAction()
+        self.onRemoveAllAction(refresh=False)  # refresh is triggered below
 
         for row, expr in enumerate(expressions):
             self._insertRow(row, expr)
