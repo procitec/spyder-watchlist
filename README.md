@@ -11,7 +11,7 @@ See the screencast in
 [spyder/#16384](https://github.com/spyder-ide/spyder/issues/16438)
 for a demonstration.
 
-## Features {#features}
+## Features
 
 * The list of expressions can be edited at any time; see [Usage](#usage) for
   details.
@@ -20,7 +20,7 @@ for a demonstration.
 * The value of an invalid expression is show as `<exception name>`. Hover the
   mouse over the value to show the full exception message in a tooltip.
 
-## Usage {#usage}
+## Usage
 
 * Changing an existing expression: Double click
 * Adding a new expression
