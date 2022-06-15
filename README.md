@@ -11,6 +11,11 @@ See the screencast in
 [spyder/#16384](https://github.com/spyder-ide/spyder/issues/16438)
 for a demonstration.
 
+
+## Installation
+
+    pip install spyder-watchlist
+
 ## Features
 
 * The list of expressions can be edited at any time; see [Usage](#usage) for
@@ -35,3 +40,15 @@ for a demonstration.
   * Menu entry in right-click menu. The selected expression is removed.
 * There is also a “Remove all expression” action in the toolbar and right-click
   menu
+
+## Known Issues
+
+* The value of variables in the current scope can be changed in Spyder’s
+  Variable Explorer plugin. Expressions in the Watchlist plugin depending on any
+  variables changed this way will display an outdated value. The correct
+  expression value is displayed after a refresh of the Watchlist. A refresh
+  is trigged by:
+  * Interacting with the IPython Console. Pressing Enter with an empty input
+    prompt is sufficient.
+  * Modifying the list of expressions in some way (add, remove or edit an
+    expression)
