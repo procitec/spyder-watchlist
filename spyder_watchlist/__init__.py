@@ -3,4 +3,4 @@
 # Copyright © PROCITEC GmbH
 # Licensed under the terms of the MIT License
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
