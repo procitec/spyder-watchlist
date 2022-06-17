@@ -18,6 +18,16 @@ for a demonstration.
 
 ## Features
 
+* Any Python expression can be entered. The Watchlist displays the stringified
+  result of the evaluation. In terms of Python code `value =
+  str(eval(expression, globals, locals))`.
+
+  > **Warning**
+  > This makes the Watchlist a very powerful tool, but this comes at a cost: Any
+  > side effects of an expression will affect your execution environment.
+
+* The values of expressions are refreshed whenever they might have changed
+  (after executing commands in the IPython Console and after debugger commands).
 * The list of expressions can be edited at any time; see [Usage](#usage) for
   details.
 * The value of an expression is shown with bold font if its value changed (e.g.
@@ -44,11 +54,11 @@ for a demonstration.
 ## Known Issues
 
 * The value of variables in the current scope can be changed in Spyder’s
-  Variable Explorer plugin. Expressions in the Watchlist plugin depending on any
-  variables changed this way will display an outdated value. The correct
-  expression value is displayed after a refresh of the Watchlist. A refresh
-  is trigged by:
-  * Interacting with the IPython Console. Pressing Enter with an empty input
+  Variable Explorer plugin. Expressions in the Watchlist depending on any
+  variables changed in the Variable Explorer will display an outdated value. The
+  correct expression value is displayed after a refresh of the Watchlist. A
+  refresh is trigged by:
+  * Executing commands in IPython Console. Pressing Enter with an empty input
     prompt is sufficient.
   * Modifying the list of expressions in some way (add, remove or edit an
     expression)
