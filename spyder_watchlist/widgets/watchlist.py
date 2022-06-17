@@ -26,7 +26,10 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
+from spyder.config.base import get_translation
 from spyder.utils import icon_manager
+
+_ = get_translation("spyder_watchlist")
 
 # see eval_watchlist_expressions() in spyder_kernels/console/kernel.py
 # (expression, evaluation result or exception message, None or name of exception)
@@ -66,7 +69,7 @@ class WatchlistTableWidget(QTableWidget):
 
         # config columns
         self.setColumnCount(2)
-        self.setHorizontalHeaderLabels(["Expression", "Value"])
+        self.setHorizontalHeaderLabels([_("Expression"), _("Value")])
         self.horizontalHeader().setStretchLastSection(True)
 
         width = self.fontMetrics().width("QAbstractItemView")

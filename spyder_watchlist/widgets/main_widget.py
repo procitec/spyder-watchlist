@@ -10,8 +10,11 @@ from qtpy.QtWidgets import QVBoxLayout
 
 from spyder.api.config.decorators import on_conf_change
 from spyder.api.shellconnect.main_widget import ShellConnectMainWidget
+from spyder.config.base import get_translation
 
 from .watchlist import WatchlistTableWidget
+
+_ = get_translation("spyder_watchlist")
 
 
 class WatchlistMainWidget(ShellConnectMainWidget):
@@ -26,25 +29,25 @@ class WatchlistMainWidget(ShellConnectMainWidget):
 
     # --- PluginMainWidget API ---
     def get_title(self):
-        return "Watchlist"
+        return _("Watchlist")
 
     def setup(self):
         self.add_expression_action = self.create_action(
             "add_expression_action",  # name
-            "Add expression",  # action’s text
+            _("Add expression"),  # action’s text
             icon=self.create_icon("edit_add"),
             # icon_text="Clear",  # otherwise there is a tooltip with the action’s text
             triggered=self.add_expression,
         )
         self.remove_expression_action = self.create_action(
             "remove_expression_action",
-            "Remove expression",
+            _("Remove expression"),
             icon=self.create_icon("edit_remove"),
             triggered=self.remove_expression,
         )
         self.remove_all_expressions_action = self.create_action(
             "remove_all_expressions_action",
-            "Remove all expression",
+            _("Remove all expression"),
             icon=self.create_icon("editdelete"),
             triggered=self.remove_all_expressions,
         )
