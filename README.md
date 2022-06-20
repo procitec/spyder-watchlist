@@ -7,9 +7,8 @@ related to the display of all variables accessible in the current scope (aka
 Variable Explorer in Spyder). But there is an important distinction: A Watchlist
 consists of a user-definable list of expressions. These expressions are
 evaluated after a debugger step and the result of the evaluation is displayed.
-See the screencast in
-[spyder/#16384](https://github.com/spyder-ide/spyder/issues/16438)
-for a demonstration.
+See [here](https://github.com/spyder-ide/spyder/issues/16438) for a screencast
+which demonstrates the plugin.
 
 
 ## Installation
@@ -55,10 +54,10 @@ for a demonstration.
 
 * The value of variables in the current scope can be changed in Spyder’s
   Variable Explorer plugin. Expressions in the Watchlist depending on any
-  variables changed in the Variable Explorer will display an outdated value. The
-  correct expression value is displayed after a refresh of the Watchlist. A
+  variable changed in the Variable Explorer will display an outdated value. The
+  new expression value is displayed after a refresh of the Watchlist. A
   refresh is trigged by:
-  * Executing commands in IPython Console. Pressing Enter with an empty input
-    prompt is sufficient.
+  * Executing commands in the IPython Console. Pressing Enter with an empty
+    input prompt is sufficient.
   * Modifying the list of expressions in some way (add, remove or edit an
     expression)
