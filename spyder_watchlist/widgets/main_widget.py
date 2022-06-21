@@ -21,10 +21,6 @@ class WatchlistMainWidget(ShellConnectMainWidget):
     def __init__(self, name, plugin, parent=None):
         super().__init__(name, plugin, parent)
 
-        layout = QVBoxLayout()
-        layout.addWidget(self._stack)
-        self.setLayout(layout)
-
         self.table_font: QFont
 
     # --- PluginMainWidget API ---
@@ -85,7 +81,6 @@ class WatchlistMainWidget(ShellConnectMainWidget):
     # --- Public API ---
     def set_table_font(self, font: QFont) -> None:
         self.table_font = font
-
         for i in range(self._stack.count()):
             widget = self._stack.widget(i)
             widget.setTableFont(font)
