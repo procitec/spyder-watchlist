@@ -15,6 +15,7 @@ from qtpy.QtGui import (
     QDropEvent,
     QFont,
     QMouseEvent,
+    QKeyEvent,
     QPalette,
 )
 from qtpy.QtWidgets import (
@@ -171,6 +172,13 @@ class WatchlistTableWidget(QTableWidget):
             # Argument does not matter and is only present due to QAction’s
             # optional argument in the triggered() signal.
             self.onAddAction()
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.key() == Qt.Key_Delete and self.selectionModel().hasSelection():
+            self.onRemoveAction()
+            event.accept()
+        else:
+            super().keyPressEvent(event)
 
     # We completely override QTableWidget’s handling of drag’n’drop because it’s
     # impossible (?) to make it do what we want to do.
