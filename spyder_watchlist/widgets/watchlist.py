@@ -80,8 +80,8 @@ class WatchlistTableWidget(QTableWidget):
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
 
         # selection mode
-        self.setSelectionBehavior(QAbstractItemView.SelectItems)
-        self.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         # drag and drop
         # We completely override QTableWidget’s handling of drag’n’drop because
@@ -108,16 +108,16 @@ class WatchlistTableWidget(QTableWidget):
         itemDelegate = self.itemDelegate()
         itemDelegate.closeEditor.connect(self.onExpressionChanged)
 
-        self.currentItemChanged.connect(self.onCurrentItemChanged)
+        self.itemSelectionChanged.connect(self._updateRemoveAction)
 
         self.shellWidget.executed.connect(lambda: self._refresh(send_expressions=False))
 
     # --- helpers ---
     def _updateRemoveAction(self):
-        if self.currentRow() == -1 or self.rowCount() == 0:
-            self.removeAction.setEnabled(False)
-        else:
+        if self.selectionModel().hasSelection():
             self.removeAction.setEnabled(True)
+        else:
+            self.removeAction.setEnabled(False)
 
     def _insertRow(
         self, insertAt: int, exprText: Optional[str] = None
@@ -155,7 +155,6 @@ class WatchlistTableWidget(QTableWidget):
 
     # overrides Qt method which does nothing by default
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
-        self._updateRemoveAction()
         self.contextMenu.popup(event.globalPos())
         event.accept()
 
@@ -246,7 +245,6 @@ class WatchlistTableWidget(QTableWidget):
         if not strippedText:
             # remove empty entries
             self.removeRow(self.currentRow())
-            self._updateRemoveAction()
             return
 
         assert len(strippedText)
@@ -258,16 +256,7 @@ class WatchlistTableWidget(QTableWidget):
         valueItem = self.item(currentRow, 1)
         valueItem.setText("")
 
-        self._updateRemoveAction()
         self._refresh()
-
-    def onCurrentItemChanged(
-        self, current: Optional[QTableWidgetItem], previous: Optional[QTableWidgetItem]
-    ) -> None:
-        if current is None:
-            self.removeAction.setEnabled(False)
-        else:
-            self.removeAction.setEnabled(True)
 
     def onAddAction(self):
         insertAt = self.rowCount()
@@ -279,9 +268,18 @@ class WatchlistTableWidget(QTableWidget):
         # finised
 
     def onRemoveAction(self):
-        assert self.currentRow() != -1
-        self.removeRow(self.currentRow())
-        self._updateRemoveAction()
+        # A selected range may contain a single item (item selected using
+        # CTRL+mouse) or multiple items (item range selected using SHIFT+mouse)
+        for row in sorted(
+            (
+                i
+                for r in self.selectedRanges()
+                for i in range(r.topRow(), r.bottomRow() + 1)
+            ),
+            reverse=True,
+        ):
+            self.removeRow(row)
+
         self._refresh()
 
     def onRemoveAllAction(self, *, refresh):
