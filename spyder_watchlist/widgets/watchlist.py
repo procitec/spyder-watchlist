@@ -6,11 +6,12 @@
 import contextlib
 import itertools
 import math
-from typing import Collection, Tuple, Optional, List
+from typing import Collection, Final, Iterator, Tuple, Optional, List
 
 from qtpy.QtCore import Qt, QObject
 from qtpy.QtGui import (
     QContextMenuEvent,
+    QDragEnterEvent,
     QDragMoveEvent,
     QDropEvent,
     QFont,
@@ -28,6 +29,7 @@ from qtpy.QtWidgets import (
 )
 
 from spyder.config.base import get_translation
+
 
 _ = get_translation("spyder_watchlist")
 
@@ -84,20 +86,15 @@ class WatchlistTableWidget(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
-        # drag and drop
-        # We completely override QTableWidget’s handling of drag’n’drop because
-        # it’s impossible (?) to make it do what we want to do. See notes below
-        # (dragEnterEvent(), dragMoveEvent(), dropEvent()).
+        # Drag and Drop
+        # NOTE: We completely override QTableWidget’s handling of drag’n’drop
+        # because it’s impossible (?) to make it do what we want to do. See
+        # notes below (dragEnterEvent(), dragMoveEvent(), dropEvent()).
         self.setAcceptDrops(True)
-        self.setDragEnabled(False)
-        # self.viewport().setAcceptDrops(True)
-        self.setDragDropMode(QAbstractItemView.DropOnly)
-
-        # The drop indicator setting enables an indicator showing in which
-        # row/column the drop will occur. Disable this indicator because we
-        # always append at end end of the table. The mouse cursor is changed to
-        # a hand regardless of the setting.
-        self.setDropIndicatorShown(False)
+        self.setDragEnabled(True)
+        self.viewport().setAcceptDrops(True)
+        self.setDragDropMode(QAbstractItemView.DragDrop)
+        self.setDropIndicatorShown(True)
 
         self.contextMenu = QMenu(self)
         self.contextMenu.addAction(self.addAction)
@@ -126,7 +123,12 @@ class WatchlistTableWidget(QTableWidget):
         self.insertRow(insertAt)
 
         exprItem = QTableWidgetItem()
-        exprItem.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable)
+        exprItem.setFlags(
+            Qt.ItemIsEnabled
+            | Qt.ItemIsSelectable
+            | Qt.ItemIsEditable
+            | Qt.ItemIsDragEnabled
+        )
         exprItem.setFont(self.tableFont)
         # Set text *after* setting the font, otherwise the font doesn’t take effect.
         if exprText is not None:
@@ -134,7 +136,9 @@ class WatchlistTableWidget(QTableWidget):
         self.setItem(insertAt, 0, exprItem)
 
         valueItem = QTableWidgetItem()
-        valueItem.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+        valueItem.setFlags(
+            Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled
+        )
         self.setItem(insertAt, 1, valueItem)
 
         return exprItem, valueItem
@@ -153,6 +157,14 @@ class WatchlistTableWidget(QTableWidget):
         self.shellWidget.call_kernel(
             interrupt=True, callback=self.displayValues
         ).eval_watchlist_expressions()
+
+    def _singleRowSelected(self) -> bool:
+        ranges = self.selectedRanges()
+        if len(ranges) != 1:
+            return False
+        if ranges[0].rowCount() != 1:
+            return False
+        return True
 
     # overrides Qt method which does nothing by default
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
@@ -188,61 +200,112 @@ class WatchlistTableWidget(QTableWidget):
     # event may start as a move action. The move action (if accepted) cuts (!)
     # the source text.
     #
-    # The drag event handlers of the base class QTableWidget are not called. The
-    # main issue is that a request for a copy action is ignored/overwritten in
-    # QTableWidget.dropEvent()
+    # Overwriting the proposed action in dragEnterEvent() only is not sufficient
+    # as dragMoveEvent() and dropEvent() from QAbstractItemView() may overwrite
+    # that value.
+
+    def mimeTypes(self) -> list[str]:
+        # NOTE Ordering matters (for whatever reason):
+        #
+        #   - "application/x-qabstractitemmodeldatalist" is the value returned
+        #   by the default implementation. It must be present. It must be the
+        #   first entry (for whatever reason), otherwise something breaks.
+        #
+        #   - "text/plain" must be present for the drop indicator to be drawn
+        #   when external text is dragged into the table.
+        return ["application/x-qabstractitemmodeldatalist", "text/plain"]
 
     # overrides Qt method QAbstractItemView.dropEvent()
     def dropEvent(self, event: QDropEvent):
-        if not event.mimeData().hasText():
-            return
+        mime = event.mimeData()
+        if mime.hasText():
+            for line in event.mimeData().text().splitlines():
+                if not line:
+                    continue
+                exprItem, valueItem = self._insertRow(self.rowCount())
+                exprItem.setText(line.strip())
 
-        for line in event.mimeData().text().splitlines():
-            if not line:
-                continue
-            exprItem, valueItem = self._insertRow(self.rowCount())
-            exprItem.setText(line.strip())
+            # Explicitly set copy action. Otherwise the source text will be cut
+            # if the proposedAction() is a move action.
+            event.setDropAction(Qt.CopyAction)
+            event.accept()
 
-        # Explicitly set copy action. Otherwise the source text will be cut
-        # if the proposedAction() is a move action.
-        event.setDropAction(Qt.CopyAction)
-        event.accept()
+            self._refresh()
+        elif (
+            event.source() == self
+            and mime.hasFormat("application/x-qabstractitemmodeldatalist")
+            and self._singleRowSelected()
+        ):
+            selectedRow: Final = self.selectedRanges()[0].topRow()
+            insertAt = self.indexAt(event.pos()).row()
+            indicatorPos: Final = self.dropIndicatorPosition()
 
-        self._refresh()
+            if insertAt < 0:
+                insertAt = self.rowCount()  # append at the end of table
+            else:
+                if indicatorPos == QAbstractItemView.BelowItem:
+                    insertAt += 1
+                elif indicatorPos == QAbstractItemView.AboveItem:
+                    pass
+                elif indicatorPos == QAbstractItemView.OnItem:
+                    pass
+                elif indicatorPos == QAbstractItemView.OnViewport:
+                    pass
+
+            if selectedRow < insertAt:
+                # row is moved down: account for removeRow() below
+                insertAt -= 1
+
+            if insertAt == selectedRow:
+                event.ignore()
+                return
+
+            exprItem = self.takeItem(selectedRow, 0)
+            valueItem = self.takeItem(selectedRow, 1)
+            self.removeRow(selectedRow)
+            assert insertAt >= 0 and insertAt <= self.rowCount()
+            self.insertRow(insertAt)
+            self.setItem(insertAt, 0, exprItem)
+            self.setItem(insertAt, 1, valueItem)
+
+            event.setDropAction(Qt.MoveAction)
+            event.accept()
+
+            self._refresh()
 
     # overrides Qt method QAbstractItemView.dragMoveEvent()
     def dragMoveEvent(self, event: QDragMoveEvent) -> None:
-        if event.mimeData().hasText():
+        # QAbstractItemView.dragMoveEvent() must be called in order to draw drop
+        # indicator and to update dropIndicatorPosition() used in dropEvent()
+        mime = event.mimeData()
+        if mime.hasText():
+            # NOTE "text/plain" must be present within mimeTypes() for the
+            # indicator to be drawn.
+            super().dragMoveEvent(event)
             event.setDropAction(Qt.CopyAction)
+            event.accept()
+        elif (
+            event.source() == self
+            and mime.hasFormat("application/x-qabstractitemmodeldatalist")
+            and self._singleRowSelected()
+        ):
+            super().dragMoveEvent(event)
+            event.setDropAction(Qt.MoveAction)
             event.accept()
 
     # overrides Qt method QAbstractItemView.dragEnterEvent()
-    def dragEnterEvent(self, event: QDragMoveEvent) -> None:
-        if event.mimeData().hasText():
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:
+        mime = event.mimeData()
+        if mime.hasText():
             event.setDropAction(Qt.CopyAction)
             event.accept()
-
-    # The following three methods are required if QTableWidget’s handling of
-    # drag’n’drop is used.
-
-    # overrides Qt method
-    # def mimeTypes(self):
-    #    return ["text/plain"] # supported types for drag’n’drop
-
-    # overrides Qt method
-    # def mimeData(self, items):
-    #    # TODO: serialize items for drag’n’drop (not required if only dropping
-    #    # is enabled?)
-    #    assert False
-
-    # overrides Qt method which crashes (and probobaly doesn’t do what we need)
-    # def dropMimeData(self, row: int, column: int, data: QMimeData, action: Qt.DropAction):
-    #    if data.hasText():
-    #        exprItem, valueItem = self._insertRow(self.rowCount())
-    #        exprItem.setText(data.text().strip())
-    #        return True
-    #    else:
-    #        return False
+        elif (
+            event.source() == self
+            and mime.hasFormat("application/x-qabstractitemmodeldatalist")
+            and self._singleRowSelected()
+        ):
+            event.setDropAction(Qt.MoveAction)
+            event.accept()
 
     # --- signal handlers ---
     def onExpressionChanged(self, editor: QWidget, hint) -> None:
