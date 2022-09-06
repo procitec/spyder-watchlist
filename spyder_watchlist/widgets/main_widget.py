@@ -10,6 +10,7 @@ from qtpy.QtGui import QFont
 
 from spyder.api.shellconnect.main_widget import ShellConnectMainWidget
 from spyder.config.base import get_translation
+from spyder.utils.qthelpers import create_action
 
 from .watchlist import WatchlistTableWidget
 from .kernel_backend import register_watchlist

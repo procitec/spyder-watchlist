@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2022-06-17 08:43+0200\n"
+"POT-Creation-Date: 2022-09-15 13:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,26 +14,30 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: spyder_watchlist/widgets/main_widget.py:32
+#: spyder_watchlist/widgets/main_widget.py:28
 msgid "Watchlist"
 msgstr ""
 
-#: spyder_watchlist/widgets/main_widget.py:37
+#: spyder_watchlist/widgets/main_widget.py:33
 msgid "Add expression"
 msgstr ""
 
-#: spyder_watchlist/widgets/main_widget.py:44
+#: spyder_watchlist/widgets/main_widget.py:40
 msgid "Remove expression"
 msgstr ""
 
-#: spyder_watchlist/widgets/main_widget.py:50
+#: spyder_watchlist/widgets/main_widget.py:46
 msgid "Remove all expression"
 msgstr ""
 
-#: spyder_watchlist/widgets/watchlist.py:72
+#: spyder_watchlist/widgets/watchlist.py:75
 msgid "Expression"
 msgstr ""
 
-#: spyder_watchlist/widgets/watchlist.py:72
+#: spyder_watchlist/widgets/watchlist.py:75
 msgid "Value"
+msgstr ""
+
+#: spyder_watchlist/widgets/watchlist.py:102
+msgid "Copy value"
 msgstr ""

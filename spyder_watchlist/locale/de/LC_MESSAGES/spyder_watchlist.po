@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-06-17 08:43+0200\n"
+"POT-Creation-Date: 2022-09-15 13:09+0200\n"
 "PO-Revision-Date: 2022-06-17 08:36+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -14,26 +14,30 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: spyder_watchlist/widgets/main_widget.py:32
+#: spyder_watchlist/widgets/main_widget.py:28
 msgid "Watchlist"
 msgstr ""
 
-#: spyder_watchlist/widgets/main_widget.py:37
+#: spyder_watchlist/widgets/main_widget.py:33
 msgid "Add expression"
 msgstr "Ausdruck hinzufügen"
 
-#: spyder_watchlist/widgets/main_widget.py:44
+#: spyder_watchlist/widgets/main_widget.py:40
 msgid "Remove expression"
 msgstr "Ausdruck entfernen"
 
-#: spyder_watchlist/widgets/main_widget.py:50
+#: spyder_watchlist/widgets/main_widget.py:46
 msgid "Remove all expression"
 msgstr "Alle Ausdrücke entfernen"
 
-#: spyder_watchlist/widgets/watchlist.py:72
+#: spyder_watchlist/widgets/watchlist.py:75
 msgid "Expression"
 msgstr "Ausdruck"
 
-#: spyder_watchlist/widgets/watchlist.py:72
+#: spyder_watchlist/widgets/watchlist.py:75
 msgid "Value"
 msgstr "Wert"
+
+#: spyder_watchlist/widgets/watchlist.py:102
+msgid "Copy value"
+msgstr "Wert kopieren"

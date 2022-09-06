@@ -20,6 +20,7 @@ from qtpy.QtGui import (
     QPalette,
 )
 from qtpy.QtWidgets import (
+    QApplication,
     QAbstractItemView,
     QAction,
     QMenu,
@@ -29,7 +30,8 @@ from qtpy.QtWidgets import (
 )
 
 from spyder.config.base import get_translation
-
+from spyder.utils.qthelpers import create_action
+from spyder.utils.icon_manager import ima
 
 _ = get_translation("spyder_watchlist")
 
@@ -96,7 +98,15 @@ class WatchlistTableWidget(QTableWidget):
         self.setDragDropMode(QAbstractItemView.DragDrop)
         self.setDropIndicatorShown(True)
 
+        self.copyValueAction = create_action(
+            self,
+            _("Copy value"),
+            icon=ima.icon("editcopy"),
+            triggered=self.onCopyValueAction,
+        )
+
         self.contextMenu = QMenu(self)
+        self.contextMenu.addAction(self.copyValueAction)
         self.contextMenu.addAction(self.addAction)
         self.contextMenu.addAction(self.removeAction)
         self.contextMenu.addAction(self.removeAllAction)
@@ -360,6 +370,11 @@ class WatchlistTableWidget(QTableWidget):
         self.removeAction.setEnabled(False)
         if refresh:
             self._refresh()
+
+    def onCopyValueAction(self):
+        currentItem = self.currentItem()
+        currentRow = self.row(currentItem)
+        QApplication.clipboard().setText(self.item(currentRow, 1).text())
 
     # --- public API ---
     def setTableFont(self, font: QFont) -> None:
