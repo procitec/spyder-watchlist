@@ -8,7 +8,7 @@ import itertools
 import math
 from typing import Collection, Final, Iterator, Tuple, Optional, List
 
-from qtpy.QtCore import Qt, QObject
+from qtpy.QtCore import Qt, QObject, QModelIndex
 from qtpy.QtGui import (
     QContextMenuEvent,
     QDragEnterEvent,
@@ -178,6 +178,15 @@ class WatchlistTableWidget(QTableWidget):
 
     # overrides Qt method which does nothing by default
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
+        index = self.indexAt(event.pos())
+        if index.isValid():
+            self.copyValueAction.setEnabled(True)
+        else:
+            self.copyValueAction.setEnabled(False)
+            self.clearSelection()
+            # This makes sure that onAddAction() appends new entries at the end
+            # of the table after the user has clicked in “empty space”.
+            self.setCurrentIndex(QModelIndex())
         self.contextMenu.popup(event.globalPos())
         event.accept()
 
@@ -191,9 +200,15 @@ class WatchlistTableWidget(QTableWidget):
         if index.isValid():
             super().mouseDoubleClickEvent(event)
         else:
-            # Argument does not matter and is only present due to QAction’s
-            # optional argument in the triggered() signal.
             self.onAddAction()
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        super().mousePressEvent(event)
+        index = self.indexAt(event.pos())
+        if not index.isValid():
+            # This makes sure that onAddAction() appends new entries at the end
+            # of the table after the user has clicked in “empty space”.
+            self.setCurrentIndex(QModelIndex())
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key_Delete and self.selectionModel().hasSelection():
@@ -229,10 +244,18 @@ class WatchlistTableWidget(QTableWidget):
     def dropEvent(self, event: QDropEvent):
         mime = event.mimeData()
         if mime.hasText():
-            for line in event.mimeData().text().splitlines():
+            insertAt = self.indexAt(event.pos()).row()
+            if insertAt < 0:
+                # Invalid index: mouse is in “empty space” of table => append at
+                # end of table
+                insertAt = self.rowCount()
+            for line in reversed(event.mimeData().text().splitlines()):
                 if not line:
                     continue
-                exprItem, valueItem = self._insertRow(self.rowCount())
+                # Insert at drop position, i.e. at item highlighted by drop
+                # indicator. The highlighted item and following items are moved
+                # down.
+                exprItem, valueItem = self._insertRow(insertAt)
                 exprItem.setText(line.strip())
 
             # Explicitly set copy action. Otherwise the source text will be cut
@@ -251,7 +274,9 @@ class WatchlistTableWidget(QTableWidget):
             indicatorPos: Final = self.dropIndicatorPosition()
 
             if insertAt < 0:
-                insertAt = self.rowCount()  # append at the end of table
+                # Invalid index: mouse is in “empty space” of table => append at
+                # end of table
+                insertAt = self.rowCount()
             else:
                 if indicatorPos == QAbstractItemView.BelowItem:
                     insertAt += 1
@@ -340,9 +365,13 @@ class WatchlistTableWidget(QTableWidget):
         self._refresh()
 
     def onAddAction(self):
-        insertAt = self.rowCount()
-        exprItem, valueItem = self._insertRow(insertAt)
+        insertAt = self.currentRow()
+        if insertAt < 0:
+            # Invalid index: mouse is in “empty space” of table => append at
+            # end of table
+            insertAt = self.rowCount()
 
+        exprItem, valueItem = self._insertRow(insertAt)
         self.setCurrentItem(exprItem)
         self.editItem(exprItem)
         # calling _refresh() is handled by onExpressionChanged() when editing is
@@ -361,6 +390,15 @@ class WatchlistTableWidget(QTableWidget):
         ):
             self.removeRow(row)
 
+        # QTableView.selectRow() also sets the current item
+        if row == self.rowCount():
+            # The last row has been removed. Select the new last row.
+            self.selectRow(self.rowCount() - 1)
+        else:
+            # Select the row following the removed one.
+            assert row < self.rowCount()
+            self.selectRow(row)
+
         self._refresh()
 
     def onRemoveAllAction(self, *, refresh):
@@ -372,9 +410,9 @@ class WatchlistTableWidget(QTableWidget):
             self._refresh()
 
     def onCopyValueAction(self):
-        currentItem = self.currentItem()
-        currentRow = self.row(currentItem)
-        QApplication.clipboard().setText(self.item(currentRow, 1).text())
+        currentRow: Final = self.currentRow()
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.item(currentRow, 1).text())
 
     # --- public API ---
     def setTableFont(self, font: QFont) -> None:
