@@ -90,12 +90,12 @@ class WatchlistMainWidget(ShellConnectMainWidget):
             widget.setTableFont(font)
 
     def all_expressions(self) -> List[str]:
-        expressions = set()
+        expressions = []
         for i in range(self._stack.count()):
             widget = self._stack.widget(i)
-            expressions.update(widget.getExpressions())
+            expressions.extend(widget.getExpressions())
 
-        return sorted(expressions)
+        return expressions
 
     # --- Slots for Signals ---
     def add_expression(self):
