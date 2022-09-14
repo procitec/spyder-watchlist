@@ -35,17 +35,20 @@ screencast which demonstrates the plugin.
 
 ## Usage
 
+* Rearranging of expressions: Use Drag & Drop
 * Changing an existing expression: Double click on expression (first column)
 * Adding a new expression
   * Toolbar `+` button
   * Menu entry in right-click menu (anywhere in the table)
   * Double click at the end of the table (only possible if there is no
     scrollbar)
-  * Drag & drop of text. If the text consists of multiple lines, each line is
-    added as an expression.
-* Removing an expression
-  * Toolbar `-` button. The currently selected expression is removed.
-  * Menu entry in right-click menu. The selected expression is removed.
+  * Drag & Drop text. If the text consists of multiple lines, each line is added
+    as an expression.
+* Removing expressions. The following actions remove the currently selected
+  expressions:
+  * Toolbar `-` button
+  * Menu entry in right-click menu
+  * `Del` keyboard key
 * There is also a “Remove all expression” action in the toolbar and right-click
   menu
 
