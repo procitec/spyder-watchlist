@@ -1,0 +1,9 @@
+[flake8]
+# black default
+max-line-length = 88
+
+# N802: function name 'X' should be lowercase
+# N803: argument name 'X' should be lowercase
+# N806: variable 'X' in function should be lowercase
+# W503: line break before binary operator
+ignore = N802,N803,N806,W503

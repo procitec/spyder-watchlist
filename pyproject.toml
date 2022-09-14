@@ -40,3 +40,15 @@ name = "spyder_watchlist"
 
 [tool.flit.sdist]
 exclude = [".gitignore"]
+
+[tool.isort]
+line_length = 88  # black default
+profile = "black"
+
+[tool.pylint.messages_control]
+disable = [
+  "invalid-name",  # C0103: Attribute name "X" doesn't conform to snake_case naming style
+  "missing-function-docstring",  # C0116: Missing function or method docstring
+  "missing-module-docstring",  # C0114: Missing module docstring
+  "missing-class-docstring",  # C0115: Missing class docstring
+]
