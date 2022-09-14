@@ -6,32 +6,31 @@
 import contextlib
 import itertools
 import math
-from typing import Collection, Final, Iterator, Tuple, Optional, List
+from typing import Collection, Final, Iterator, List, Optional, Tuple
 
-from qtpy.QtCore import Qt, QObject, QModelIndex, QMimeData
+from qtpy.QtCore import QMimeData, QModelIndex, QObject, Qt
 from qtpy.QtGui import (
     QContextMenuEvent,
     QDragEnterEvent,
     QDragMoveEvent,
     QDropEvent,
     QFont,
-    QMouseEvent,
     QKeyEvent,
+    QMouseEvent,
     QPalette,
 )
 from qtpy.QtWidgets import (
-    QApplication,
     QAbstractItemView,
     QAction,
+    QApplication,
     QMenu,
     QTableWidget,
     QTableWidgetItem,
     QWidget,
 )
-
 from spyder.config.base import get_translation
-from spyder.utils.qthelpers import create_action
 from spyder.utils.icon_manager import ima
+from spyder.utils.qthelpers import create_action
 
 _ = get_translation("spyder_watchlist")
 
