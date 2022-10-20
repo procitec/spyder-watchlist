@@ -30,7 +30,7 @@ readme = "README.md"
 
 [project.urls]
 Source = "https://github.com/procitec/spyder-watchlist"
-Changelog = "https://github.com/procitec/spyder-watchlist/blob/testing/CHANGELOG.md"
+Changelog = "https://github.com/procitec/spyder-watchlist/blob/main/CHANGELOG.md"
 
 [project.entry-points."spyder.plugins"]
 watchlist = "spyder_watchlist.plugin:Watchlist"
