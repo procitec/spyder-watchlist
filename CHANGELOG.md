@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 - 2024-12-19
+
+### Fixed
+
+* Fix font when editing an entry
+* Fix Changelog link
+
 ## 1.1.0 - 2022-10-20
 
 ### Added
