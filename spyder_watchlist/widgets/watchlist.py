@@ -24,6 +24,7 @@ from qtpy.QtWidgets import (
     QAction,
     QApplication,
     QMenu,
+    QStyledItemDelegate,
     QTableWidget,
     QTableWidgetItem,
     QWidget,
@@ -48,6 +49,15 @@ def block_signals(obj: QObject):
         obj.blockSignals(oldValue)
 
 
+class FontDelegate(QStyledItemDelegate):
+    def createEditor(self, parent: QWidget, option, index: QModelIndex) -> QWidget:
+        editor = super().createEditor(parent, option, index)
+        font = index.data(Qt.FontRole)
+        if font is not None:
+            editor.setFont(font)
+        return editor
+
+
 class WatchlistTableWidget(QTableWidget):
     def __init__(
         self,
@@ -61,6 +71,9 @@ class WatchlistTableWidget(QTableWidget):
         super().__init__(parent)
 
         self.shellWidget = shellWidget
+
+        self.itemDelegate = FontDelegate(self)
+        self.setItemDelegate(self.itemDelegate)
 
         # actions are connected in WatchlistMainWidget from watchlist/widgets/main_widget.py
         self.addAction = addAction
@@ -112,8 +125,7 @@ class WatchlistTableWidget(QTableWidget):
 
         # We do not use QTableWidget’s cellChanged() signal as it is triggered
         # by too many actions.
-        itemDelegate = self.itemDelegate()
-        itemDelegate.closeEditor.connect(self.onExpressionChanged)
+        self.itemDelegate.closeEditor.connect(self.onExpressionChanged)
 
         self.itemSelectionChanged.connect(self._updateRemoveAction)
 
