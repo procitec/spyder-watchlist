@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.0.0rc0 - 2024-12-20
+
+* First release with support for Spyder 6. For Spyder 5, use the `spyder-v5` branch.
+
 ## 1.1.1 - 2024-12-19
 
 ### Fixed
