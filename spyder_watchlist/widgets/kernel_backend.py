@@ -33,3 +33,5 @@ def register_watchlist():
     kernel.frontend_comm.register_call_handler(
         "eval_watchlist_expressions", eval_watchlist_expressions
     )
+
+    kernel.frontend_call(blocking=False).watchlist_backend_ready()

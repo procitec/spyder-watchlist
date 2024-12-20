@@ -4,9 +4,10 @@
 # Licensed under the terms of the MIT License
 
 import contextlib
+import inspect
 import itertools
 import math
-from typing import Collection, Final, Iterator, List, Optional, Tuple
+from typing import Collection, Final, List, Optional, Tuple
 
 from qtpy.QtCore import QMimeData, QModelIndex, QObject, Qt
 from qtpy.QtGui import (
@@ -32,6 +33,9 @@ from qtpy.QtWidgets import (
 from spyder.config.base import get_translation
 from spyder.utils.icon_manager import ima
 from spyder.utils.qthelpers import create_action
+
+from .kernel_backend import register_watchlist
+
 
 _ = get_translation("spyder_watchlist")
 
@@ -129,9 +133,19 @@ class WatchlistTableWidget(QTableWidget):
 
         self.itemSelectionChanged.connect(self._updateRemoveAction)
 
+        self.shellWidget.kernel_handler.kernel_comm.register_call_handler(
+            "watchlist_backend_ready", self.onWatchlistBackendReady
+        )
+        self.shellWidget.sig_config_spyder_kernel.connect(self.onKernelRestarted)
         self.shellWidget.executed.connect(lambda: self._refresh(send_expressions=False))
 
     # --- helpers ---
+    def _registerWatchlist(self):
+        self.shellWidget.execute(inspect.getsource(register_watchlist), hidden=True)
+        self.shellWidget.execute(
+            "register_watchlist(); del register_watchlist", hidden=True
+        )
+
     def _updateRemoveAction(self):
         if self.selectionModel().hasSelection():
             self.removeAction.setEnabled(True)
@@ -377,6 +391,12 @@ class WatchlistTableWidget(QTableWidget):
             event.ignore()
 
     # --- signal handlers ---
+    def onKernelRestarted(self) -> None:
+        self._registerWatchlist()
+
+    def onWatchlistBackendReady(self) -> None:
+        self._refresh()
+
     def onExpressionChanged(self, editor: QWidget, hint) -> None:
         currentItem = self.currentItem()
         assert currentItem is not None
@@ -453,7 +473,7 @@ class WatchlistTableWidget(QTableWidget):
         self.tableFont = font
         boldFont = QFont(self.tableFont)
         boldFont.setBold(True)
-        for (row, column) in itertools.product(
+        for row, column in itertools.product(
             range(self.rowCount()), range(self.columnCount())
         ):
             item = self.item(row, column)

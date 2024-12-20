@@ -3,15 +3,12 @@
 # Copyright © PROCITEC GmbH
 # Licensed under the terms of the MIT License
 
-import inspect
 from typing import List
 
 from qtpy.QtGui import QFont
 from spyder.api.shellconnect.main_widget import ShellConnectMainWidget
 from spyder.config.base import get_translation
-from spyder.utils.qthelpers import create_action
 
-from .kernel_backend import register_watchlist
 from .watchlist import WatchlistTableWidget
 
 _ = get_translation("spyder_watchlist")
@@ -61,9 +58,6 @@ class WatchlistMainWidget(ShellConnectMainWidget):
 
     # --- ShellConnectMainWidget API ---
     def create_new_widget(self, shellwidget):
-        shellwidget.execute(inspect.getsource(register_watchlist), hidden=True)
-        shellwidget.execute("register_watchlist(); del register_watchlist", hidden=True)
-
         widget = WatchlistTableWidget(
             shellWidget=shellwidget,
             addAction=self.add_expression_action,
