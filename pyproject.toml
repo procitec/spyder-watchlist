@@ -10,8 +10,8 @@ license = {file = "LICENSE"}
 dynamic = ["version"]
 requires-python = ">=3.7"  # required by Spyder
 dependencies = [
-    "spyder>=5.3,<6",
-    "spyder-kernels>=2.3,<3",
+    "spyder>=6,<7",
+    "spyder-kernels>=3,<4",
 ]
 keywords = [
     "Spyder",
