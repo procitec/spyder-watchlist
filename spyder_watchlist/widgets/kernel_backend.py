@@ -11,7 +11,7 @@ def register_watchlist():
         if kernel.watchlist_debugger_only and not kernel.shell.is_debugging():
             return None
 
-        ns = kernel._get_current_namespace()
+        ns = kernel.shell._get_current_namespace()
 
         data = []
         for expr in kernel.watchlist_expressions:
